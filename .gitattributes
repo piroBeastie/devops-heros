@@ -1,0 +1,3 @@
+# shell scripts must stay LF, otherwise bash on linux fails with
+# "set: pipefail: invalid option name" (hit this with run-demo.sh)
+*.sh text eol=lf
