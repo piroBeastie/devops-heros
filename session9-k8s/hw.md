@@ -165,3 +165,12 @@ then from inside the frontend container (nginx image has no curl, so i used bash
 if i want the frontend to NOT reach the database, i have to make 2 networks and keep the database only in the backend network (that is what the `demo/docker-compose.yml` file does).
 
 first try the database gave "Connection refused" because mysql was still starting up, after ~30 seconds it worked.
+
+---
+
+## Resources (from the course repo)
+
+- https://kubernetes.io/docs/tutorials/kubernetes-basics/
+- https://minikube.sigs.k8s.io/docs/start/
+- https://kubernetes.io/docs/concepts/architecture/
+- https://github.com/Nency-Ravaliya/Kubernetes
