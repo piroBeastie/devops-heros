@@ -5,3 +5,9 @@ opens a fixed port (30000-32767) on the node, so the app can be accessed from ou
 ![NodePort screenshot](Screenshot%202026-09-17%20235340.png)
 
 service shows `80:30080/TCP`. i got the node ip with `minikube ip` (192.168.49.2) and then `curl http://192.168.49.2:30080` worked from outside the cluster.
+
+### Direct node IP access and minikube service --url
+
+![NodePort access](Screenshot%202026-09-18%20003714.png)
+
+on my setup (docker driver inside wsl2 linux) curling `192.168.49.2:30080` directly works and returns HTTP 200. on macOS/Windows this fails because the node ip only exists inside docker's VM, and you have to use `minikube service <svc> --url` or `minikube tunnel` instead.
