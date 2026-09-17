@@ -1,4 +1,9 @@
-# Session 12 HW - Differences and Deployment Strategies
+# Session 12 HW - Differences, Deployment Strategies, Services and DNS
+
+tasks 1, 2 and 3 are below. tasks 4 and 5 are in the services folder:
+
+- **Task 4 - 5 types of services:** [ClusterIP](../session-11-kubernetes-services/01-clusterip/screenshot.md) | [NodePort](../session-11-kubernetes-services/02-nodeport/screenshot.md) | [LoadBalancer](../session-11-kubernetes-services/03-loadbalancer/screenshot.md) | [ExternalName](../session-11-kubernetes-services/04-externalname/screenshot.md) | [Headless](../session-11-kubernetes-services/05-headless/screenshot.md)
+- **Task 5 - FQDN and CoreDNS:** [fqdn-coredns.md](../session-11-kubernetes-services/fqdn-coredns.md)
 
 ## Task 1: StatefulSet vs Deployment vs DaemonSet
 
