@@ -96,4 +96,38 @@ result: **flake8 clean, 4 passed, 100% coverage**. running it locally first is t
 
 ## Workflow run on GitHub
 
-(added after pushing - see the screenshots below)
+after pushing, both workflows ran by themselves on the `push` to main.
+
+![Actions page](screenshots/Screenshot%202026-10-07%20171953.png)
+
+the Actions tab shows **2 workflow runs, both green** on commit `c0b661a` - `Hello World #1` took 5s and `CI Pipeline #1` took 27s.
+
+i also checked the result from the terminal using the GitHub API, which shows every job and step:
+
+![Workflow run details](screenshots/Screenshot%202026-10-07%20171939.png)
+
+```
+WORKFLOW         STATUS      RESULT     COMMIT
+Hello World      completed   success    c0b661aa
+CI Pipeline      completed   success    c0b661aa
+
+JOB: Code Lint   completed/success      JOB: Run Tests  completed/success
+    Checkout code        success           Checkout code         success
+    Set up Python        success           Set up Python         success
+    Install lint tool    success           Install dependencies  success
+    Run flake8           success           Run tests with cov.   success
+                                           Upload test results   success
+                                           Upload coverage rep.  success
+
+ARTIFACT: test-results     354 bytes
+ARTIFACT: coverage-report  546 bytes
+```
+
+things this proves:
+
+- the **`needs: lint`** dependency worked - `Run Tests` only started after `Code Lint` finished green
+- `actions/checkout@v4` and `actions/setup-python@v5` pulled the repo and installed python on the runner
+- the **artifacts** were uploaded and are downloadable from the run page (`test-results` = the junit xml, `coverage-report` = coverage.xml)
+- the extra `Post Set up Python` / `Post Checkout code` steps are the actions cleaning themselves up after the job - github adds those automatically
+
+so the same pipeline i ran locally in a container also runs on github's `ubuntu-latest` runner on every push to main.
