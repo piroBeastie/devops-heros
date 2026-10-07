@@ -3,7 +3,7 @@
 **Name:** Nanakjot Singh Chahal
 **Enrollment No:** 24bcs10132
 
-manifests used are in [`session-11-kubernetes-services/`](../session-11-kubernetes-services).
+the manifests are the ones in this folder.
 each service type also has its own `screenshot.md` in its folder.
 
 ---
@@ -35,7 +35,7 @@ kubectl explain service.spec.ports
 kubectl get svc web-service-nodeport -o jsonpath='...'
 ```
 
-![Ports](../session-11-kubernetes-services/Screenshot%202026-09-18%20003546.png)
+![Ports](Screenshot%202026-09-18%20003546.png)
 
 on my nodeport service: `port=80 targetPort=80 nodePort=30080`, and the deployment's `containerPort` is 80.
 
@@ -49,7 +49,7 @@ kubectl get svc web-service-clusterip
 kubectl exec curl-client -- curl -s http://web-service-clusterip:8080
 ```
 
-![ClusterIP](../session-11-kubernetes-services/01-clusterip/Screenshot%202026-09-17%20235308.png)
+![ClusterIP](01-clusterip/Screenshot%202026-09-17%20235308.png)
 
 service got CLUSTER-IP `10.110.72.164` and **no external ip**, so it is reachable only from inside the cluster. curling the service name from the client pod returned the nginx page.
 
@@ -61,7 +61,7 @@ kubectl exec curl-client -- curl -s http://web-service-clusterip.default.svc.clu
 kubectl exec curl-client -- nslookup web-service-clusterip
 ```
 
-![ClusterIP endpoints and FQDN](../session-11-kubernetes-services/01-clusterip/Screenshot%202026-09-18%20003551.png)
+![ClusterIP endpoints and FQDN](01-clusterip/Screenshot%202026-09-18%20003551.png)
 
 the endpoints object lists the **3 pod IPs** behind the service - that is the list kube-proxy load balances over. the short name and the full FQDN both work.
 
@@ -75,7 +75,7 @@ kubectl get svc web-service-nodeport
 curl http://$(minikube ip):30080
 ```
 
-![NodePort](../session-11-kubernetes-services/02-nodeport/Screenshot%202026-09-17%20235340.png)
+![NodePort](02-nodeport/Screenshot%202026-09-17%20235340.png)
 
 service shows `80:30080/TCP`. `minikube ip` gave `192.168.49.2` and curling `192.168.49.2:30080` from outside the cluster returned the nginx page.
 
@@ -88,7 +88,7 @@ kubectl apply -f 03-loadbalancer/app-deployment.yaml -f 03-loadbalancer/service.
 kubectl get svc web-service-loadbalancer
 ```
 
-![LoadBalancer pending](../session-11-kubernetes-services/03-loadbalancer/Screenshot%202026-09-17%20235411.png)
+![LoadBalancer pending](03-loadbalancer/Screenshot%202026-09-17%20235411.png)
 
 at first EXTERNAL-IP is `<pending>` forever, because there is no cloud provider in minikube to create a real load balancer. a LoadBalancer service still allocates a NodePort (here `80:32687`) so i could test it that way.
 
@@ -100,7 +100,7 @@ kubectl get svc web-service-loadbalancer
 curl http://127.0.0.1
 ```
 
-![LoadBalancer with tunnel](../session-11-kubernetes-services/03-loadbalancer/Screenshot%202026-09-18%20003557.png)
+![LoadBalancer with tunnel](03-loadbalancer/Screenshot%202026-09-18%20003557.png)
 
 with the tunnel running the EXTERNAL-IP became **127.0.0.1** and i could curl it on **plain port 80** - no high port number. the tunnel needs sudo because port 80 is a privileged port.
 
@@ -116,7 +116,7 @@ kubectl get svc external-database-service
 kubectl exec dns-test-client -- nslookup external-database-service.default.svc.cluster.local
 ```
 
-![ExternalName](../session-11-kubernetes-services/04-externalname/Screenshot%202026-09-17%20235437.png)
+![ExternalName](04-externalname/Screenshot%202026-09-17%20235437.png)
 
 TYPE is `ExternalName`, CLUSTER-IP is `<none>` and EXTERNAL-IP shows the domain. nslookup returned:
 
@@ -136,7 +136,7 @@ kubectl get svc web-service-headless
 kubectl exec headless-dns-client -- nslookup web-service-headless.default.svc.cluster.local
 ```
 
-![Headless](../session-11-kubernetes-services/05-headless/Screenshot%202026-09-17%20235529.png)
+![Headless](05-headless/Screenshot%202026-09-17%20235529.png)
 
 CLUSTER-IP is **None**, and nslookup of the service returned **3 separate A records** (the 3 pod IPs) instead of one virtual ip.
 
@@ -148,7 +148,7 @@ kubectl exec headless-dns-client -- curl -s http://web-stateful-0.web-service-he
 kubectl delete pod web-stateful-0
 ```
 
-![Headless pod FQDN](../session-11-kubernetes-services/05-headless/Screenshot%202026-09-18%20003625.png)
+![Headless pod FQDN](05-headless/Screenshot%202026-09-18%20003625.png)
 
 each pod has its own stable dns name `<pod>.<service>.<namespace>.svc.cluster.local`, and curling `web-stateful-0.web-service-headless` directly worked. after deleting `web-stateful-0` it came back with the **same name**. this is what a database cluster needs - each member has to be individually addressable, not load balanced.
 
@@ -158,7 +158,7 @@ each pod has its own stable dns name `<pod>.<service>.<namespace>.svc.cluster.lo
 
 a service with no selector does not get endpoints automatically - i created the `Endpoints` object myself, pointing at an ip outside the cluster.
 
-![Service without selector](../session-11-kubernetes-services/Screenshot%202026-09-18%20003807.png)
+![Service without selector](Screenshot%202026-09-18%20003807.png)
 
 `kubectl get endpoints` first said **not found**, and after applying the Endpoints manifest it showed `192.168.1.150:3306`.
 
@@ -168,7 +168,7 @@ this is how you put a legacy/external server behind a normal kubernetes service 
 
 ## Task 8: FQDN and CoreDNS
 
-full writeup: [fqdn-coredns.md](../session-11-kubernetes-services/fqdn-coredns.md)
+full writeup: [fqdn-coredns.md](fqdn-coredns.md)
 
 ```bash
 kubectl get pods -n kube-system -l k8s-app=kube-dns
@@ -176,7 +176,7 @@ kubectl exec curl-client -- cat /etc/resolv.conf
 kubectl exec curl-client -- nslookup web-service-clusterip.default.svc.cluster.local
 ```
 
-![CoreDNS and FQDN](../session-11-kubernetes-services/Screenshot%202026-09-17%20235536.png)
+![CoreDNS and FQDN](Screenshot%202026-09-17%20235536.png)
 
 CoreDNS runs in `kube-system` and is exposed by the `kube-dns` service on `10.96.0.10`. every pod's `/etc/resolv.conf` has:
 
@@ -201,7 +201,7 @@ kubectl delete pod web-app-clusterip-66865d4855-hjbjj
 kubectl delete pod web-stateful-1
 ```
 
-![Pod identity drill](../session-11-kubernetes-services/Screenshot%202026-09-18%20003708.png)
+![Pod identity drill](Screenshot%202026-09-18%20003708.png)
 
 | controller | deleted | came back as |
 |---|---|---|
@@ -276,7 +276,7 @@ curl http://192.168.49.2:30080
 minikube service web-service-nodeport --url
 ```
 
-![Minikube nodeport access](../session-11-kubernetes-services/02-nodeport/Screenshot%202026-09-18%20003714.png)
+![Minikube nodeport access](02-nodeport/Screenshot%202026-09-18%20003714.png)
 
 on **my** setup the direct `node-ip:nodePort` worked and returned HTTP 200, because i run minikube with the docker driver inside **linux (wsl2 ubuntu)**, so the docker bridge network `192.168.49.0/24` is reachable from the same linux kernel.
 
