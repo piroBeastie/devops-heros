@@ -15,8 +15,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/bookshelf-backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/bookshelf-frontend
 
 jobs:
   test:
@@ -79,6 +77,14 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
+      # a docker repository name has to be lowercase, and a github username
+      # does not have to be - so the owner is lowercased here
+      - name: Work out the image names
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "BACKEND_IMAGE=${REGISTRY}/${OWNER}/bookshelf-backend" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE=${REGISTRY}/${OWNER}/bookshelf-frontend" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
