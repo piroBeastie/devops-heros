@@ -353,6 +353,94 @@ argo cd noticed the cluster no longer matched git, started an automated sync and
 
 the lesson: once an app is under gitops with `selfHeal: true`, **editing the cluster directly does nothing permanent**. if you want 1 replica you change the file in git. that is what "git is the source of truth" means in practice.
 
+### gitops in action - scaling by committing to git
+
+this is lab 07 step 7, and it is the part that needed a `git push` to be real. i changed the replica count in `05-introduction-to-gitops/app/deployment.yaml` from 2 to 3, committed it and pushed it to my fork - **no `kubectl` at all**:
+
+```bash
+git commit -m "session20: scale the gitops app to three replicas"
+git push origin main
+```
+
+then i watched the Application. argo cd polls every ~3 minutes, so i hit Refresh (the cli version of the UI's REFRESH button) instead of waiting:
+
+```bash
+kubectl get application session20-app -n argocd -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,REVISION:.status.sync.revision
+kubectl get deploy session20-app -n session20
+kubectl annotate application session20-app -n argocd argocd.argoproj.io/refresh=normal --overwrite
+# 30 seconds later
+```
+
+![gitops scale](screenshots/Screenshot%202026-10-07%20181448.png)
+
+```
+before:  session20-app   Synced   c0b661aa183225aa98daa742ab5447a2931cc507     2/2
+after:   session20-app   Synced   0f4f7784100e30892574c4e89ea9d8bb8e39f631     3/3
+```
+
+the revision argo cd is synced to moved to my new commit, and a third pod appeared. the only thing i did to the cluster was commit a one line change to github. that is gitops.
+
+---
+
+## 8. Mini Project
+
+requirements were: namespace + deployment + service + an Argo CD Application, with `replicas: 2`.
+
+i put the three workload manifests in [`gitops-app/`](gitops-app) - that folder is the **git source**, and nothing else goes in it - and the Application in [`argocd-apps/session20-mini.yaml`](argocd-apps/session20-mini.yaml), which is the one file i apply by hand:
+
+```
+gitops-app/
+|-- namespace.yaml     (namespace session20-mini)
+|-- deployment.yaml    (nginx, replicas: 2)
+|-- service.yaml       (ClusterIP :80)
+```
+
+```bash
+ls gitops-app
+kubectl apply -f argocd-apps/session20-mini.yaml
+kubectl get applications -n argocd
+kubectl get all -n session20-mini
+```
+
+![mini project synced](screenshots/Screenshot%202026-10-07%20181733.png)
+
+```
+NAME             SYNC STATUS   HEALTH STATUS
+session20-app    Synced        Healthy
+session20-mini   Synced        Healthy
+
+pod/session20-mini-6df57dbdcc-4sl2c   1/1   Running
+pod/session20-mini-6df57dbdcc-tk57k   1/1   Running
+service/session20-mini                ClusterIP   10.98.77.108   80/TCP
+deployment.apps/session20-mini        2/2   2   2
+```
+
+one `kubectl apply` of the Application and argo cd built the namespace, the deployment and the service out of github by itself.
+
+### observing it
+
+```bash
+kubectl exec -n session20-mini deploy/session20-mini -- wget -qO- http://session20-mini/ | head -4
+kubectl logs deployment/session20-mini -n session20-mini --tail=2
+kubectl get application session20-mini -n argocd -o custom-columns=...
+```
+
+![mini project logs](screenshots/Screenshot%202026-10-07%20181738.png)
+
+i curled the service from inside a pod to generate traffic, and the access log picked it up:
+
+```
+10.244.0.1 - - [07/Oct/2026:12:47:36 +0000] "GET / HTTP/1.1" 200 615 "-" "Wget" "-"
+```
+
+that line ties the whole session together - the **log** says what happened, the Service name resolved through cluster DNS, and the pod only exists because of a file in git.
+
+### both apps in the UI
+
+![both applications](screenshots/Screenshot%202026-10-07%20181812.png)
+
+`Synced 2`, `Healthy 2`, both sourced from `https://github.com/piroBeastie/devops-heros.git` at `main`, deploying into `in-cluster/session20` and `in-cluster/session20-mini`.
+
 ---
 
 ## Viva questions
