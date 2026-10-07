@@ -34,9 +34,6 @@ jobs:
   sast:
     name: SAST - Bandit
     runs-on: ubuntu-latest
-    # reports only: the demo app has a real HIGH finding (debug=True + bind 0.0.0.0),
-    # so a strict gate here would block the pipeline on purpose.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -47,8 +44,11 @@ jobs:
       - name: Install bandit
         run: pip install bandit
 
+      # report only: the demo app has a real HIGH finding (debug=True + bind
+      # 0.0.0.0), so a strict gate here would block the whole pipeline
       - name: Run bandit
         working-directory: ${{ env.APP_DIR }}
+        continue-on-error: true
         run: bandit -r app/ -ll
 
   sca:
@@ -93,7 +93,7 @@ jobs:
         run: docker build -t devsecops-demo:${{ github.sha }} .
 
       - name: Trivy report (all HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: devsecops-demo:${{ github.sha }}
           severity: 'HIGH,CRITICAL'
@@ -101,7 +101,7 @@ jobs:
           exit-code: '0'
 
       - name: Security gate - fail on FIXABLE HIGH/CRITICAL
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: devsecops-demo:${{ github.sha }}
           severity: 'HIGH,CRITICAL'

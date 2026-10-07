@@ -95,7 +95,7 @@ jobs:
 
       # report everything first so the log shows what is in the images
       - name: Trivy report - backend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           severity: 'HIGH,CRITICAL'
@@ -103,7 +103,7 @@ jobs:
           exit-code: '0'
 
       - name: Trivy report - frontend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           severity: 'HIGH,CRITICAL'
@@ -112,7 +112,7 @@ jobs:
 
       # the gate: fail the build on HIGH/CRITICAL CVEs that have a fix available
       - name: Security gate - backend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           severity: 'HIGH,CRITICAL'
@@ -121,7 +121,7 @@ jobs:
           exit-code: '1'
 
       - name: Security gate - frontend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           severity: 'HIGH,CRITICAL'
